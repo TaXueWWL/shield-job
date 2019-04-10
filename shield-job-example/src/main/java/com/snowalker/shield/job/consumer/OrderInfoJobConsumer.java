@@ -43,7 +43,10 @@ public class OrderInfoJobConsumer {
          */
         new JobConsumerExecutor().execute(
                 new RocketMQConsumerProperty(TOPIC, CONSUMER_GROUP, nameSrvAddr, TAG),
-                    new JobConsumerListenerAdapter((msgs, context) -> getConsumeConcurrentlyStatus(msgs))).start();
+                    new JobConsumerListenerAdapter((msgs, context) -> {
+                        return getConsumeConcurrentlyStatus(msgs);
+                    }).setMaxReconsumeTimes(1)
+        ).start();
     }
 
     private ConsumeConcurrentlyStatus getConsumeConcurrentlyStatus(List<MessageExt> msgs) {
@@ -57,7 +60,7 @@ public class OrderInfoJobConsumer {
                 // 解析打印实体
                 LOGGER.info("模拟订单Job消息消费成功,msgId={}, protocol={}", msg.getMsgId(), protocol.toString());
             }
-            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+            return ConsumeConcurrentlyStatus.RECONSUME_LATER;
         } catch (Exception e) {
             LOGGER.error("钱包扣款消费异常,e={}", e);
             return ConsumeConcurrentlyStatus.RECONSUME_LATER;

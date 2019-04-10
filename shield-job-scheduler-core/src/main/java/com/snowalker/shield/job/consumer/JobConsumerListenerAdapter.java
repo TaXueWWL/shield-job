@@ -22,28 +22,51 @@ public class JobConsumerListenerAdapter implements JobConsumerListener {
 
     private JobConsumerListener jobConsumerListener;
 
+    /**最大重复消费次数，达到则提交消息并将消息存储*/
+    private volatile Integer maxReconsumeTimes;
+
     public JobConsumerListenerAdapter(JobConsumerListener jobConsumerListener) {
         this.jobConsumerListener = jobConsumerListener;
     }
 
     /**
      * TODO 完善重发逻辑
-     * 消费代理
+     * 消费代理, 不需要重发
      * @param msgs 消息体
      * @param context
      * @return
      */
     @Override
-    public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
+    public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs,
+                                                    ConsumeConcurrentlyContext context) {
         ConsumeConcurrentlyStatus consumeConcurrentlyStatus =
                 this.jobConsumerListener.consumeMessage(msgs, context);
-        if (ConsumeConcurrentlyStatus.RECONSUME_LATER.equals(consumeConcurrentlyStatus)) {
-            LOGGER.info("-------------此处应该有重发逻辑---------------");
+        if (this.maxReconsumeTimes == null) {
+            return consumeConcurrentlyStatus;
         }
-        MessageExt messageExt = msgs.get(0);
-        int reconsumeTimes = messageExt.getReconsumeTimes();
-        LOGGER.info("-----------发送次数--{}, msgId={}, msgBody={}",
-                reconsumeTimes, messageExt.getMsgId(), new String(messageExt.getBody()));
+        if (ConsumeConcurrentlyStatus.RECONSUME_LATER == consumeConcurrentlyStatus) {
+            for (MessageExt msg : msgs) {
+                int currentReconsumeTimes = msg.getReconsumeTimes();
+                String msgId = msg.getMsgId();
+                String msgTopic = msg.getTopic();
+                // 比较当前重发次数与最大重发次数,超过最大重发阈值则提交消息并持久化后重发,幂等最终由消费端控制
+                if (currentReconsumeTimes >= maxReconsumeTimes.intValue()) {
+                    LOGGER.info("message reconsumeTimes has been grater than maxReconsumeTimes,commit message and store it. currentReconsumeTimes={}, msgId={}, msgTopic={}",
+                            currentReconsumeTimes, msgId, msgTopic);
+                    // todo 转储消息
+                    return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+                }
+            }
+        }
         return consumeConcurrentlyStatus;
+    }
+
+    public int getMaxReconsumeTimes() {
+        return maxReconsumeTimes;
+    }
+
+    public JobConsumerListenerAdapter setMaxReconsumeTimes(int maxReconsumeTimes) {
+        this.maxReconsumeTimes = maxReconsumeTimes;
+        return this;
     }
 }

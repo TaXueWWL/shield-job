@@ -67,7 +67,7 @@ public class JobProducerExecutor<T extends BaseJob> implements JobProducer {
                                          Object arg) {
         // 取出生产者作业集合
         List<T> jobList = jobProducerListener.produce(arg);
-        if (jobList == null || jobList.size() <= 0) {
+        if (jobList == null || jobList.size() < 0) {
             throw new JobProduceException("BaseJob list is empty, " +
                     "please make true you have returned job list in com.shield.job.producer.JobProducerListener.produce(final Object arg)");
         }
@@ -96,7 +96,7 @@ public class JobProducerExecutor<T extends BaseJob> implements JobProducer {
                 try {
                     SendResult sendResult = defaultMQProducer.send(message, sendTimeout);
                     if (sendResult != null) {
-                        LOGGER.info("send job message successful, message sendStatus={}, msgId={}, queueOffset={}, transactionId={}, offsetMsgId={}, regionId={}, sendSuccessJobList.size()={}",
+                        LOGGER.debug("send job message successful, message sendStatus={}, msgId={}, queueOffset={}, transactionId={}, offsetMsgId={}, regionId={}, sendSuccessJobList.size()={}",
                                 sendResult.getSendStatus(),
                                 sendResult.getMsgId(),
                                 sendResult.getQueueOffset(),
