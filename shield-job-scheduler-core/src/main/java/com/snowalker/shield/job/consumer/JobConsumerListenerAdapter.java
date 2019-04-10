@@ -1,5 +1,6 @@
 package com.snowalker.shield.job.consumer;
 
+import com.google.common.base.Preconditions;
 import com.snowalker.shield.job.constant.ShieldJobMsgResendStoreTypeEnum;
 import com.snowalker.shield.job.consumer.listener.JobConsumerListener;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
@@ -38,11 +39,12 @@ public class JobConsumerListenerAdapter implements JobConsumerListener {
      * @param jobConsumerListener
      */
     public JobConsumerListenerAdapter(JobConsumerListener jobConsumerListener) {
+        Preconditions.checkNotNull(jobConsumerListener, "jobConsumerListener cannot be NULL!");
         this.jobConsumerListener = jobConsumerListener;
     }
 
     /**
-     * 使用Redis作为重发存储机制，设置最大重试次数，超过后入Redis重发
+     * 使用重发存储机制，设置最大重试次数，超过后入Redis重发
      * @param jobConsumerListener
      * @param maxReconsumeTimes
      * @param msgStoreTypeEnum
@@ -50,6 +52,9 @@ public class JobConsumerListenerAdapter implements JobConsumerListener {
     public JobConsumerListenerAdapter(JobConsumerListener jobConsumerListener,
                                       Integer maxReconsumeTimes,
                                       ShieldJobMsgResendStoreTypeEnum msgStoreTypeEnum) {
+        Preconditions.checkNotNull(jobConsumerListener, "jobConsumerListener cannot be NULL!");
+        Preconditions.checkNotNull(maxReconsumeTimes, "maxReconsumeTimes cannot be NULL!");
+        Preconditions.checkNotNull(msgStoreTypeEnum, "msgStoreTypeEnum cannot be NULL!");
         this.jobConsumerListener = jobConsumerListener;
         this.maxReconsumeTimes = maxReconsumeTimes;
         this.msgStoreTypeEnum  = msgStoreTypeEnum;
@@ -80,6 +85,9 @@ public class JobConsumerListenerAdapter implements JobConsumerListener {
                     LOGGER.info("message reconsumeTimes has been grater than maxReconsumeTimes={},commit message and store it. currentReconsumeTimes={}, msgId={}, msgTopic={}",
                             this.maxReconsumeTimes, currentReconsumeTimes, msgId, msgTopic);
                     // todo 转储消息
+                    Preconditions.checkNotNull(msgStoreTypeEnum, "msgStoreTypeEnum cannot be NULL!");
+
+
                     return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                 }
             }

@@ -54,6 +54,7 @@ public class OrderInfoJobProducer {
 
     @PostConstruct
     public void init() throws MQClientException {
+        // 实例化作业生产调度器
         jobProducerExecutor = new JobProducerExecutor()
                 .init(new RocketMQProducerProperty(PRODUCER_GROUP,nameSrvAddr));
         jobProducerExecutor.getProducer().start();
@@ -62,6 +63,7 @@ public class OrderInfoJobProducer {
     @Scheduled(cron = "${order.resend.cron}")
     public void execute() {
         try {
+            // 传入JobProducerListener实现类，返回作业实体
             Result<JobSendResult> jobSendResult = jobProducerExecutor.execute(
                     (JobProducerListener<OrderInfoJobProcotol>) arg -> {
                         List<OrderInfoJobProcotol> jobs = new ArrayList<>(10);

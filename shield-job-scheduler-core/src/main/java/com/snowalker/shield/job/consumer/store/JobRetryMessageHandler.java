@@ -9,7 +9,7 @@ import java.util.List;
  * @version 1.0
  * @date 2019/4/10 14:24
  * @className JobRetryMessageStore
- * @desc TODO 消息重试存储接口
+ * @desc 消息重试存储接口
  */
 public interface JobRetryMessageHandler {
 
