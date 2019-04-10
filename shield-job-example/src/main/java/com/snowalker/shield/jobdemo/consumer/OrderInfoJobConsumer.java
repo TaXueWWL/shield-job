@@ -58,6 +58,7 @@ public class OrderInfoJobConsumer {
                 }, 1, nameSrvAddr, new MessageStoreRedisTemplate(redisTemplate))).start();
     }
 
+
     private ConsumeConcurrentlyStatus getConsumeConcurrentlyStatus(List<MessageExt> msgs) {
         try {
             Thread.sleep(3000);
