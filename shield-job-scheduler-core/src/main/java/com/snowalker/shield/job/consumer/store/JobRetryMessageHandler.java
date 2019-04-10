@@ -11,7 +11,7 @@ import java.util.List;
  * @className JobRetryMessageStore
  * @desc TODO 消息重试存储接口
  */
-public interface JobRetryMessageStoreHandler {
+public interface JobRetryMessageHandler {
 
 
     /**
