@@ -11,9 +11,11 @@ import java.util.List;
  * @version 1.0
  * @date 2019/4/10 16:05
  * @className JobRetryMessageRedisHandler
- * @desc
+ * @desc todo
  */
 public class JobRetryMessageRedisHandler implements JobRetryMessageHandler {
+
+    // TODO 设入RedisTemplate
 
 
 

@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <configuration>
-    <appender name="ShieldJobCoreAppender"
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %level %C.%M[%F:%L] - %msg%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="COMMON-APPENDER"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${user.home}/logback_test.log</file>
         <append>true</append>
@@ -21,9 +28,12 @@
     </appender>
 
     <logger name="ShieldJobCoreLogger" additivity="false">
-        <level value="INFO"/>
+        <level value="DEBUG"/>
         <appender-ref ref="ShieldJobCoreAppender"/>
     </logger>
 
+    <root level="DEBUG">
+        <appender-ref ref="COMMON-APPENDER"/>
+    </root>
 
 </configuration>
