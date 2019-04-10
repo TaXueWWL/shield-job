@@ -17,11 +17,13 @@ public class JobRetryMessageMySQLHandler implements JobRetryMessageHandler {
 
     @Override
     public Result<Boolean> storeRetryJobMsg(JobRetryMessage jobRetryMessage) {
+        System.out.println("作业消息存储MySQL处理器实现--模拟存储消息");
         return null;
     }
 
     @Override
     public Result<Boolean> countRetryJobMsgResendTimes(String messageId, String msgTopic) {
+        System.out.println("作业消息存储MySQL处理器实现--模拟增加重试次数");
         return null;
     }
 

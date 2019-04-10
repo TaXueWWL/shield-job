@@ -4,6 +4,7 @@ import com.snowalker.shield.job.consumer.JobConsumerExecutor;
 import com.snowalker.shield.job.consumer.JobConsumerListenerAdapter;
 import com.snowalker.shield.job.consumer.RocketMQConsumerProperty;
 import com.snowalker.shield.job.consumer.listener.JobConsumerListener;
+import com.snowalker.shield.job.consumer.store.impl.MessageStoreRedisTemplate;
 import com.snowalker.shield.jobdemo.protocol.OrderInfoJobProcotol;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
@@ -11,7 +12,9 @@ import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -39,17 +42,20 @@ public class OrderInfoJobConsumer {
     @Value("${rocketmq.nameServer}")
     private String nameSrvAddr;
 
+    @Autowired
+    RedisTemplate redisTemplate;
+
     @PostConstruct
     public void execute() throws MQClientException {
-        /**
-         * lambda模式
-         */
+
         new JobConsumerExecutor().execute(
-                new RocketMQConsumerProperty(TOPIC, CONSUMER_GROUP, nameSrvAddr, TAG),
-                    new JobConsumerListenerAdapter((msgs, context) -> {
+                new RocketMQConsumerProperty(
+                        TOPIC, CONSUMER_GROUP, nameSrvAddr, TAG), new JobConsumerListenerAdapter(new JobConsumerListener() {
+                    @Override
+                    public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
                         return getConsumeConcurrentlyStatus(msgs);
-                    }).setMaxReconsumeTimes(1)
-        ).start();
+                    }
+                }, 1, nameSrvAddr, new MessageStoreRedisTemplate(redisTemplate))).start();
     }
 
     private ConsumeConcurrentlyStatus getConsumeConcurrentlyStatus(List<MessageExt> msgs) {
@@ -101,6 +107,18 @@ public class OrderInfoJobConsumer {
                 new RocketMQConsumerProperty(
                         TOPIC, CONSUMER_GROUP, nameSrvAddr, TAG
                 ), jobConsumerListenerAdapter).start();
+    }
+
+    private void consumeLambda() throws MQClientException {
+        /**
+         * lambda模式
+         */
+        new JobConsumerExecutor().execute(
+                new RocketMQConsumerProperty(TOPIC, CONSUMER_GROUP, nameSrvAddr, TAG),
+                    new JobConsumerListenerAdapter((msgs, context) -> {
+                        return getConsumeConcurrentlyStatus(msgs);
+                    })
+        ).start();
     }
 
 }

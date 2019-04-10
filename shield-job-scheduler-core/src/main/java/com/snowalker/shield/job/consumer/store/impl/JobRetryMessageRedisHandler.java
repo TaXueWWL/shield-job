@@ -15,17 +15,15 @@ import java.util.List;
  */
 public class JobRetryMessageRedisHandler implements JobRetryMessageHandler {
 
-    // TODO 设入RedisTemplate
-
-
-
     @Override
     public Result<Boolean> storeRetryJobMsg(JobRetryMessage jobRetryMessage) {
+        System.out.println("作业消息存储Redis处理器实现--模拟存储消息");
         return null;
     }
 
     @Override
     public Result<Boolean> countRetryJobMsgResendTimes(String messageId, String msgTopic) {
+        System.out.println("作业消息存储Redis处理器实现--模拟增加重试次数");
         return null;
     }
 
