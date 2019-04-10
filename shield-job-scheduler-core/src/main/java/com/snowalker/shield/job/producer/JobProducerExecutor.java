@@ -1,11 +1,11 @@
 package com.snowalker.shield.job.producer;
 
+import com.snowalker.shield.job.BaseJob;
 import com.snowalker.shield.job.JobProducer;
+import com.snowalker.shield.job.JobSendResult;
 import com.snowalker.shield.job.Result;
 import com.snowalker.shield.job.constant.ResultCodeEnum;
 import com.snowalker.shield.job.exception.JobProduceException;
-import com.snowalker.shield.job.job.BaseJob;
-import com.snowalker.shield.job.job.JobSendResult;
 import com.snowalker.shield.job.producer.listener.JobProducerListener;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.exception.MQBrokerException;

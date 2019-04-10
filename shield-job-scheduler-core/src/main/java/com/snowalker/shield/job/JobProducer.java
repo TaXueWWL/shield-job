@@ -1,6 +1,5 @@
 package com.snowalker.shield.job;
 
-import com.snowalker.shield.job.job.JobSendResult;
 import com.snowalker.shield.job.producer.JobProducerExecutor;
 import com.snowalker.shield.job.producer.RocketMQProducerProperty;
 import com.snowalker.shield.job.producer.listener.JobProducerListener;
