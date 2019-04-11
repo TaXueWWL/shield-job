@@ -62,14 +62,19 @@ public class OrderInfoJobConsumer {
     private ConsumeConcurrentlyStatus getConsumeConcurrentlyStatus(List<MessageExt> msgs) {
         try {
             Thread.sleep(3000);
+            String msgId = "";
+            String msgBody = "";
             // 默认msgs只有一条消息
             for (MessageExt msg : msgs) {
                 String message = new String(msg.getBody());
                 OrderInfoJobProcotol protocol = new OrderInfoJobProcotol();
                 protocol.decode(message);
                 // 解析打印实体
-                LOGGER.info("模拟订单Job消息消费成功,msgId={}, protocol={}", msg.getMsgId(), protocol.toString());
+                msgId = msg.getMsgId();
+                msgBody = message;
             }
+            LOGGER.info("模拟订单Job消息消费逻辑结束,状态--[RECONSUME_LATER]--,msgId={}, protocol={}", msgId, msgBody);
+
             return ConsumeConcurrentlyStatus.RECONSUME_LATER;
         } catch (Exception e) {
             LOGGER.error("钱包扣款消费异常,e={}", e);
