@@ -19,10 +19,11 @@ public class MessageStoreRedisTemplate<K, V> extends RedisTemplate<K, V> impleme
     }
 
     /**
-     * 获取RedisTemplate实例
+     * 获取RedisTemplate
      * @return
      */
     public RedisTemplate getRedisTemplate() {
         return redisTemplate;
     }
+
 }
