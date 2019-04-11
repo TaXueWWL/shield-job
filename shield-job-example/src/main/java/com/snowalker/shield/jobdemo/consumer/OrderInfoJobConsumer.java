@@ -46,7 +46,7 @@ public class OrderInfoJobConsumer {
     RedisTemplate redisTemplate;
 
     @PostConstruct
-    public void execute() throws MQClientException {
+    public void execute() throws Exception {
 
         new JobConsumerExecutor().execute(
                 new RocketMQConsumerProperty(
@@ -122,4 +122,23 @@ public class OrderInfoJobConsumer {
         ).start();
     }
 
+
+//    @PostConstruct
+//    public void execute() throws Exception {
+//
+//        redisTemplate.opsForList().leftPush("product:list", "iphone xs max");
+//        redisTemplate.opsForList().leftPush("product:list", "thinkpad x1 carbon");
+//        redisTemplate.opsForList().leftPush("product:list", "mackBook pro13");
+//        redisTemplate.opsForList().leftPush("product:list", "HuaWei Mate20 pro");
+//
+////        redisTemplate.opsForValue().increment("snoawlker-love-qinqin");
+//        Integer resendTimes = (Integer) redisTemplate.opsForValue().get("snoawlker-love-qinqin1");
+//        redisTemplate.opsForValue().increment("snoawlker-love-qinqin");
+//        LOGGER.info("resendTimes={}", resendTimes);
+//        Thread.sleep(15000);
+//
+//        redisTemplate.opsForList().rightPop("iphone xs max");
+//        LOGGER.info("\"iphone xs max\" has poped");
+//
+//    }
 }
