@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * @date 2019/4/10 20:02
  * @className MessageStoreMySQLTemplate
  * @desc MySQL消息存储模板，包装JdbcTemplate
+ * TODO MYSQL消息存储实现
  */
 public class MessageStoreMySQLTemplate extends JdbcTemplate implements MessageStoreClientTemplate {
 

@@ -8,15 +8,14 @@ import com.snowalker.shield.job.consumer.listener.JobConsumerListener;
 import com.snowalker.shield.job.consumer.store.JobRetryMessage;
 import com.snowalker.shield.job.consumer.store.JobRetryMessageHandler;
 import com.snowalker.shield.job.consumer.store.JobRetryMessageHandlerFactory;
-import com.snowalker.shield.job.consumer.store.MessageStoreClientTemplate;
-import com.snowalker.shield.job.exception.JobProduceException;
+import com.snowalker.shield.job.consumer.store.impl.MessageStoreMySQLTemplate;
+import com.snowalker.shield.job.consumer.store.impl.MessageStoreRedisTemplate;
+import com.snowalker.shield.job.exception.JobConsumeException;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 
@@ -26,7 +25,8 @@ import java.util.List;
  * @date 2019/4/9 22:33
  * @className JobConsumerListenerAdapter
  * @desc JobConsumerListener适配器
- * TODO JDBCTemplate及RedisTemplate引用注入
+ * TODO 改成构造中传入类型枚举
+ * TODO set传入对应的客户端
  */
 public class JobConsumerListenerAdapter implements JobConsumerListener {
 
@@ -44,11 +44,14 @@ public class JobConsumerListenerAdapter implements JobConsumerListener {
     private String rocketMQNameSrvAddr;
 
     /**
-     * 消息存储客户端模板接口，实现类：
-     * @see com.snowalker.shield.job.consumer.store.impl.MessageStoreMySQLTemplate
-     * @see com.snowalker.shield.job.consumer.store.impl.MessageStoreRedisTemplate
+     * 消息存储客户端模板接口，Redis实现
      */
-    private MessageStoreClientTemplate messageStoreClientTemplate;
+    private MessageStoreRedisTemplate messageStoreRedisTemplate;
+
+    /**
+     * 消息存储客户端模板接口，MySQL实现
+     */
+    private MessageStoreMySQLTemplate messageStoreMySQLTemplate;
 
     /**
      * 默认构造，只消费不重发
@@ -60,27 +63,48 @@ public class JobConsumerListenerAdapter implements JobConsumerListener {
     }
 
     /**
-     * 使用messageStoreClientTemplate的实例作为重发存储机制，设置最大重试次数，超过后入对应的持久化设施重发
+     * 使用MessageStoreRedisTemplate的实例作为重发存储机制，设置最大重试次数，超过后入Redis重发
      * @param jobConsumerListener
      * @param maxReconsumeTimes
      * @param rocketMQNameSrvAddr
-     * @param messageStoreClientTemplate
+     * @param messageStoreRedisTemplate
      */
     public JobConsumerListenerAdapter(JobConsumerListener jobConsumerListener,
                                       Integer maxReconsumeTimes,
                                       String rocketMQNameSrvAddr,
-                                      MessageStoreClientTemplate messageStoreClientTemplate) {
+                                      MessageStoreRedisTemplate messageStoreRedisTemplate) {
         Preconditions.checkNotNull(jobConsumerListener, "jobConsumerListener cannot be NULL!");
         Preconditions.checkNotNull(maxReconsumeTimes, "maxReconsumeTimes cannot be NULL!");
         Preconditions.checkNotNull(rocketMQNameSrvAddr, "rocketMQNameSrvAddr cannot be NULL!");
-        Preconditions.checkNotNull(messageStoreClientTemplate, "messageStoreClientTemplate instance cannot be NULL");
+        Preconditions.checkNotNull(messageStoreRedisTemplate, "messageStoreRedisTemplate instance cannot be NULL");
 
         this.jobConsumerListener = jobConsumerListener;
         this.maxReconsumeTimes = maxReconsumeTimes;
         this.rocketMQNameSrvAddr = rocketMQNameSrvAddr;
-        this.messageStoreClientTemplate = messageStoreClientTemplate;
+        this.messageStoreRedisTemplate = messageStoreRedisTemplate;
     }
 
+    /**
+     * 使用MessageStoreMySQLTemplate的实例作为重发存储机制，设置最大重试次数，超过后入MySQL重发
+     * @param jobConsumerListener
+     * @param maxReconsumeTimes
+     * @param rocketMQNameSrvAddr
+     * @param messageStoreMySQLTemplate
+     */
+    public JobConsumerListenerAdapter(JobConsumerListener jobConsumerListener,
+                                      Integer maxReconsumeTimes,
+                                      String rocketMQNameSrvAddr,
+                                      MessageStoreMySQLTemplate messageStoreMySQLTemplate) {
+        Preconditions.checkNotNull(jobConsumerListener, "jobConsumerListener cannot be NULL!");
+        Preconditions.checkNotNull(maxReconsumeTimes, "maxReconsumeTimes cannot be NULL!");
+        Preconditions.checkNotNull(rocketMQNameSrvAddr, "rocketMQNameSrvAddr cannot be NULL!");
+        Preconditions.checkNotNull(messageStoreMySQLTemplate, "messageStoreMySQLTemplate instance cannot be NULL");
+
+        this.jobConsumerListener = jobConsumerListener;
+        this.maxReconsumeTimes = maxReconsumeTimes;
+        this.rocketMQNameSrvAddr = rocketMQNameSrvAddr;
+        this.messageStoreMySQLTemplate = messageStoreMySQLTemplate;
+    }
     /**
      * TODO 完善重发逻辑
      * 消费代理, 不需要重发
@@ -91,12 +115,9 @@ public class JobConsumerListenerAdapter implements JobConsumerListener {
     @Override
     public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs,
                                                     ConsumeConcurrentlyContext context) {
-        Preconditions.checkNotNull(this.jobConsumerListener, "jobConsumerListener cannot be NULL!");
-        /**
-         * 默认不传重试次数则表明
-         */
         ConsumeConcurrentlyStatus consumeConcurrentlyStatus =
                 this.jobConsumerListener.consumeMessage(msgs, context);
+        // 默认不传重试次数则不做消息存储重发，只消费
         if (this.maxReconsumeTimes == null) {
             return consumeConcurrentlyStatus;
         }
@@ -107,27 +128,43 @@ public class JobConsumerListenerAdapter implements JobConsumerListener {
                 int currentReconsumeTimes = msg.getReconsumeTimes();
                 String msgId = msg.getMsgId();
                 String msgTopic = msg.getTopic();
+                String msgTag = msg.getTags();
                 String msgBody = new String(msg.getBody());
                 // 比较当前重发次数与最大重发次数,超过最大重发阈值则提交消息并持久化后重发,幂等最终由消费端控制
                 if (currentReconsumeTimes >= maxReconsumeTimes.intValue()) {
+
+                    // 通过调用方传递的messageStoreClientTemplate具体的类型选取对应的JobRetryMessageHandler
+                    JobRetryMessageHandlerFactory jobRetryMessageHandlerFactory = new JobRetryMessageHandlerFactory();
+
                     LOGGER.info("message reconsumeTimes has been grater than maxReconsumeTimes={},commit message and store it. currentReconsumeTimes={}, msgId={}, msgTopic={}",
                             this.maxReconsumeTimes, currentReconsumeTimes, msgId, msgTopic);
+
                     // todo 转储消息,需要在重发任务调度器中完成标记死信以及定时删除消费成功的消息的功能
-                    if (messageStoreClientTemplate instanceof RedisTemplate) {
+
+                    // 根据构造传入的messageStoreClientTemplate具体实例，选取对应的消息持久化策略
+                    if (messageStoreRedisTemplate != null) {
+                        LOGGER.info("Using MessageStoreRedisTemplate to store retry message,repository is Redis");
                         msgStoreTypeEnum = ShieldJobMsgResendStoreTypeEnum.MSG_STORE_TYPE_REDIS;
-                    } else if (messageStoreClientTemplate instanceof JdbcTemplate) {
+                        // 传入messageStoreRedisTemplate引用
+                        jobRetryMessageHandlerFactory.setMessageStoreRedisTemplate(messageStoreRedisTemplate);
+                    } else if (messageStoreMySQLTemplate != null) {
+                        LOGGER.info("Using MessageStoreMySQLTemplate to store retry message,repository is MySQL");
                         msgStoreTypeEnum = ShieldJobMsgResendStoreTypeEnum.MSG_STORE_TYPE_MYSQL;
+                        // 传入messageStoreMySQLTemplate引用
+                        jobRetryMessageHandlerFactory.setMessageStoreMySQLTemplate(messageStoreMySQLTemplate);
                     } else {
-                        throw new JobProduceException("messageStoreClientTemplate can only be instance of RedisTemplate or JdbcTemplate, please choose a right one!");
+                        throw new JobConsumeException("Please input either MessageStoreRedisTemplate or MessageStoreMySQLTemplate instance, for that you can store retry message!");
                     }
 
                     JobRetryMessageHandler jobRetryMessageHandler =
-                            JobRetryMessageHandlerFactory.createRetryMessageHandler(msgStoreTypeEnum);
+                            jobRetryMessageHandlerFactory.createRetryMessageHandler(msgStoreTypeEnum);
+                    // 构造重发消息持久化实体
                     JobRetryMessage jobRetryMessage = new JobRetryMessage();
                     jobRetryMessage.setMsgId(msgId)
                             .setMsgTopic(msgTopic)
                             .setMsgBody(msgBody)
-                            .setMsgResendStatusEnum(ShieldJobMsgResendStatusEnum.MSG_RESEND_STATUS_RECONSUMELATER)
+                            .setMsgTag(msgTag)
+                            .setMsgResendStatusEnum(ShieldJobMsgResendStatusEnum.MSG_RESEND_STATUS_RECONSUMELATER.toString())
                             .setMsgRetryProducerGroup(ShieldInnerMsgResendConst.getResendPGVal(msgTopic))
                             .setMsgNameSrvAddr(this.rocketMQNameSrvAddr);
                     jobRetryMessageHandler.storeRetryJobMsg(jobRetryMessage);
@@ -153,8 +190,11 @@ public class JobConsumerListenerAdapter implements JobConsumerListener {
         return rocketMQNameSrvAddr;
     }
 
-    public MessageStoreClientTemplate getMessageStoreClientTemplate() {
-        return messageStoreClientTemplate;
+    public MessageStoreRedisTemplate getMessageStoreRedisTemplate() {
+        return messageStoreRedisTemplate;
     }
 
+    public MessageStoreMySQLTemplate getMessageStoreMySQLTemplate() {
+        return messageStoreMySQLTemplate;
+    }
 }

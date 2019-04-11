@@ -23,6 +23,7 @@
         <logback-version>1.2.3</logback-version>
         <junit-version>4.12</junit-version>
         <spring-boot-data-redis-version>2.1.3.RELEASE</spring-boot-data-redis-version>
+        <jackson-version>2.9.8</jackson-version>
     </properties>
 
     <dependencies>
@@ -74,6 +75,24 @@
             <version>${spring-boot-data-redis-version}</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
 
     </dependencies>
 

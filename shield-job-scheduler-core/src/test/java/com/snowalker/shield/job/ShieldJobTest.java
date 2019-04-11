@@ -1,7 +1,5 @@
 package com.snowalker.shield.job;
 
-import com.snowalker.shield.job.constant.ShieldJobMsgResendStoreTypeEnum;
-import com.snowalker.shield.job.consumer.store.JobRetryMessageHandlerFactory;
 import org.junit.Test;
 
 /**
@@ -18,14 +16,5 @@ public class ShieldJobTest {
      */
     @Test
     public void testJobRetryMessageHandlerFactory() {
-        ShieldJobMsgResendStoreTypeEnum redis = ShieldJobMsgResendStoreTypeEnum.MSG_STORE_TYPE_REDIS;
-
-        JobRetryMessageHandlerFactory.createRetryMessageHandler(redis);
-
-        ShieldJobMsgResendStoreTypeEnum mysql = ShieldJobMsgResendStoreTypeEnum.MSG_STORE_TYPE_MYSQL;
-
-        JobRetryMessageHandlerFactory.createRetryMessageHandler(mysql);
-
-        JobRetryMessageHandlerFactory.createRetryMessageHandler(null);
     }
 }

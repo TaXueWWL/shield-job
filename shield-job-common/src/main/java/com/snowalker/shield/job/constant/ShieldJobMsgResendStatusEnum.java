@@ -19,4 +19,5 @@ public enum ShieldJobMsgResendStatusEnum {
      * 重试消费失败，仍需继续消费
      */
     MSG_RESEND_STATUS_RECONSUMELATER;
+
 }

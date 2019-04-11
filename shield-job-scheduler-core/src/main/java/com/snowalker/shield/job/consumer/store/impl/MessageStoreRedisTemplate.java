@@ -10,23 +10,19 @@ import org.springframework.data.redis.core.RedisTemplate;
  * @className MessageStoreRedisTemplate
  * @desc Redis消息存储模板，包装
  */
-public class MessageStoreRedisTemplate extends RedisTemplate implements MessageStoreClientTemplate {
+public class MessageStoreRedisTemplate<K, V> extends RedisTemplate<K, V> implements MessageStoreClientTemplate {
 
     private RedisTemplate redisTemplate;
-
-    public MessageStoreRedisTemplate() {
-    }
 
     public MessageStoreRedisTemplate(RedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
+    /**
+     * 获取RedisTemplate实例
+     * @return
+     */
     public RedisTemplate getRedisTemplate() {
         return redisTemplate;
-    }
-
-    public MessageStoreRedisTemplate setRedisTemplate(RedisTemplate redisTemplate) {
-        this.redisTemplate = redisTemplate;
-        return this;
     }
 }

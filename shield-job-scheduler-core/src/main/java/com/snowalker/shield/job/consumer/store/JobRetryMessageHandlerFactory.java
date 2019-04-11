@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 import com.snowalker.shield.job.constant.ShieldJobMsgResendStoreTypeEnum;
 import com.snowalker.shield.job.consumer.store.impl.JobRetryMessageMySQLHandler;
 import com.snowalker.shield.job.consumer.store.impl.JobRetryMessageRedisHandler;
+import com.snowalker.shield.job.consumer.store.impl.MessageStoreMySQLTemplate;
+import com.snowalker.shield.job.consumer.store.impl.MessageStoreRedisTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,12 +26,18 @@ public class JobRetryMessageHandlerFactory {
     private final static Map<String, JobRetryMessageHandler> retryMessageHandlerContext =
             new ConcurrentHashMap<>(2);
 
+    private MessageStoreClientTemplate messageStoreClientTemplate;
+
+    private MessageStoreRedisTemplate messageStoreRedisTemplate;
+
+    private MessageStoreMySQLTemplate messageStoreMySQLTemplate;
+
     /**
      * 从容器获取消息重试处理器实例，不存在则创建并放置到容器中
      * @param resendStoreHandlerType
      * @return
      */
-    public static synchronized JobRetryMessageHandler createRetryMessageHandler(ShieldJobMsgResendStoreTypeEnum resendStoreHandlerType) {
+    public synchronized JobRetryMessageHandler createRetryMessageHandler(ShieldJobMsgResendStoreTypeEnum resendStoreHandlerType) {
 
         Preconditions.checkNotNull(resendStoreHandlerType, "Parameter resendStoreHandlerType cannot be NULL! Please select an correct ShieldJobMsgResendStoreTypeEnum value");
         LOGGER.debug("resendStoreHandlerType={}", resendStoreHandlerType);
@@ -42,10 +50,10 @@ public class JobRetryMessageHandlerFactory {
         }
         // 不存在则创建后放置到容器中
         if (ShieldJobMsgResendStoreTypeEnum.MSG_STORE_TYPE_REDIS.equals(resendStoreHandlerType)) {
-            retryMessageHandler = new JobRetryMessageRedisHandler();
+            retryMessageHandler = new JobRetryMessageRedisHandler(this.messageStoreRedisTemplate);
             retryMessageHandlerContext.put(resendStoreHandlerType.toString(), retryMessageHandler);
         } else if (ShieldJobMsgResendStoreTypeEnum.MSG_STORE_TYPE_MYSQL.equals(resendStoreHandlerType)) {
-            retryMessageHandler = new JobRetryMessageMySQLHandler();
+            retryMessageHandler = new JobRetryMessageMySQLHandler(this.messageStoreMySQLTemplate);
             retryMessageHandlerContext.put(resendStoreHandlerType.toString(), retryMessageHandler);
         } else {
             retryMessageHandler = null;
@@ -53,5 +61,33 @@ public class JobRetryMessageHandlerFactory {
         LOGGER.debug("retryMessageHandler={}", retryMessageHandler.getClass());
         return retryMessageHandler;
     }
+
+    public MessageStoreRedisTemplate getMessageStoreRedisTemplate() {
+        return messageStoreRedisTemplate;
+    }
+
+    public JobRetryMessageHandlerFactory setMessageStoreRedisTemplate(MessageStoreRedisTemplate messageStoreRedisTemplate) {
+        this.messageStoreRedisTemplate = messageStoreRedisTemplate;
+        return this;
+    }
+
+    public MessageStoreMySQLTemplate getMessageStoreMySQLTemplate() {
+        return messageStoreMySQLTemplate;
+    }
+
+    public JobRetryMessageHandlerFactory setMessageStoreMySQLTemplate(MessageStoreMySQLTemplate messageStoreMySQLTemplate) {
+        this.messageStoreMySQLTemplate = messageStoreMySQLTemplate;
+        return this;
+    }
+
+    public MessageStoreClientTemplate getMessageStoreClientTemplate() {
+        return messageStoreClientTemplate;
+    }
+
+    public JobRetryMessageHandlerFactory setMessageStoreClientTemplate(MessageStoreClientTemplate messageStoreClientTemplate) {
+        this.messageStoreClientTemplate = messageStoreClientTemplate;
+        return this;
+    }
+
 
 }

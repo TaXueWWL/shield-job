@@ -1,7 +1,0 @@
-com\snowalker\shield\jobdemo\producer\OrderInfoJobProducer.class
-com\snowalker\shield\jobdemo\consumer\OrderInfoJobConsumer.class
-com\snowalker\shield\jobdemo\bean\OrderInfoJob.class
-com\snowalker\shield\jobdemo\protocol\OrderInfoJobProcotol.class
-com\snowalker\shield\jobdemo\consumer\OrderInfoJobConsumer$1.class
-com\snowalker\shield\jobdemo\consumer\OrderInfoJobConsumer$2.class
-com\snowalker\shield\jobdemo\App.class

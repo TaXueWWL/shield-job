@@ -16,6 +16,11 @@ public class ShieldInnerMsgResendConst {
 
     /**消息重投递生产者组前缀*/
     private static final String INNER_MSG_RESEND_PRODUCER_GROUP_PREFIX = "PID_MSG_RESEND_";
+
+    /**Redis重发消息队列前缀*/
+    public static final String REDIS_RETRY_MESSAGE_QUEUE_PREFIX = "SHIELD_JOB_RETRY_MSG_QUEUE:";
+
+
     /**
      * 获取内部消息重发次数计数器key
      * @param suffix
@@ -24,6 +29,16 @@ public class ShieldInnerMsgResendConst {
     public static String getResendTimesRedisKey(String suffix) {
         StringBuilder keyBuilder = new StringBuilder();
         return keyBuilder.append("shield:msg_resend:counter:").append(suffix).toString();
+    }
+
+    /**
+     * 获取内部消息重发次数计数器key
+     * @param suffix
+     * @return
+     */
+    public static String getStoreRetryJobMsgRedisKey(String suffix) {
+        StringBuilder keyBuilder = new StringBuilder();
+        return keyBuilder.append("shield:msg_resend:store:").append(suffix).toString();
     }
 
     /**
