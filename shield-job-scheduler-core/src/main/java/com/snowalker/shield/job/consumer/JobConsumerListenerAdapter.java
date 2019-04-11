@@ -118,6 +118,10 @@ public class JobConsumerListenerAdapter implements JobConsumerListener {
         if (this.maxReconsumeTimes == null) {
             return consumeConcurrentlyStatus;
         }
+        // TODO 判断数据库中存储的当前消息的后台线程重提交次数，如果大于最大重发阈值，则不再重发，放入死信队列，直接返回
+
+
+
         // 只要重试阈值不为空则认为要进行消费失败重发，入重发设施
         if (ConsumeConcurrentlyStatus.RECONSUME_LATER == consumeConcurrentlyStatus) {
 
@@ -166,8 +170,7 @@ public class JobConsumerListenerAdapter implements JobConsumerListener {
                             .setMsgNameSrvAddr(this.rocketMQNameSrvAddr);
                     jobRetryMessageHandler.storeRetryJobMsg(jobRetryMessage);
 
-                    // 转储次数增1
-                    jobRetryMessageHandler.countRetryJobMsgResendTimes(msgId, msgTopic);
+                    // 超过最大重复消费次数直接提交消息并持久化消息
                     return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                 }
             }

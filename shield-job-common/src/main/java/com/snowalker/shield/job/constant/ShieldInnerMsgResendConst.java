@@ -11,8 +11,8 @@ public class ShieldInnerMsgResendConst {
 
     private ShieldInnerMsgResendConst() {}
 
-    /**最大重复投递次数3次，超过三次后不再重发*/
-    private static final int MAX_RESEND_TIMES = 3;
+    /**最大重复投递次数3次，超过三次后不再投递消息到MQ的broker*/
+    public static final int MAX_RESEND_TIMES = 3;
 
     /**消息重投递生产者组前缀*/
     private static final String INNER_MSG_RESEND_PRODUCER_GROUP_PREFIX = "PID_MSG_RESEND_";
@@ -42,6 +42,16 @@ public class ShieldInnerMsgResendConst {
     }
 
     /**
+     * 获取重发死信队列名key
+     * @param suffix
+     * @return
+     */
+    public static String getRetryDeadMsgQueueKey(String suffix) {
+        StringBuilder keyBuilder = new StringBuilder(REDIS_RETRY_MESSAGE_PREFIX);
+        return keyBuilder.append("retry_dead_message_queue:").append(suffix).toString();
+    }
+
+    /**
      * 获取内部消息重发生产者组producerGroup值
      * @param topic
      * @return
@@ -51,7 +61,5 @@ public class ShieldInnerMsgResendConst {
         return valBuilder.append(INNER_MSG_RESEND_PRODUCER_GROUP_PREFIX).append(topic).toString();
     }
 
-    public static int getMaxResendTimes() {
-        return MAX_RESEND_TIMES;
-    }
+
 }

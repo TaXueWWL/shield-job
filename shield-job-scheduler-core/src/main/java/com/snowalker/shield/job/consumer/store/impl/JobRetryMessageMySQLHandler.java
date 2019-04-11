@@ -1,6 +1,7 @@
 package com.snowalker.shield.job.consumer.store.impl;
 
 import com.snowalker.shield.job.Result;
+import com.snowalker.shield.job.constant.ShieldJobRetryMesssageStatusEnum;
 import com.snowalker.shield.job.consumer.store.JobRetryMessage;
 import com.snowalker.shield.job.consumer.store.JobRetryMessageHandler;
 import com.snowalker.shield.job.consumer.store.MessageStoreClientTemplate;
@@ -24,24 +25,29 @@ public class JobRetryMessageMySQLHandler implements JobRetryMessageHandler {
     }
 
     @Override
-    public Result<Boolean> storeRetryJobMsg(JobRetryMessage jobRetryMessage) {
+    public Result<ShieldJobRetryMesssageStatusEnum> storeRetryJobMsg(JobRetryMessage jobRetryMessage) {
         System.out.println("作业消息存储MySQL处理器实现--模拟存储消息");
         return null;
     }
 
     @Override
-    public Result<Boolean> countRetryJobMsgResendTimes(String messageId, String msgTopic) {
+    public Result<ShieldJobRetryMesssageStatusEnum> countRetryJobMsgResendTimes(JobRetryMessage jobRetryMessage) {
         System.out.println("作业消息存储MySQL处理器实现--模拟增加重试次数");
         return null;
     }
 
     @Override
-    public Result<Boolean> removeRetrySuccessJobMsg(List<JobRetryMessage> jobRetryMessages) {
+    public Result<ShieldJobRetryMesssageStatusEnum> removeRetrySuccessJobMsg(List<JobRetryMessage> jobRetryMessages) {
         return null;
     }
 
     @Override
-    public Result<Boolean> markAfterRetryDeadJobMsg(String messageId, String msgTopic) {
+    public Result<ShieldJobRetryMesssageStatusEnum> markAfterRetryDeadJobMsg(String messageId, String msgTopic) {
+        return null;
+    }
+
+    @Override
+    public Result<ShieldJobRetryMesssageStatusEnum> storeRetryJobMsgIntoDeadQueue(JobRetryMessage jobRetryMessage) {
         return null;
     }
 }
