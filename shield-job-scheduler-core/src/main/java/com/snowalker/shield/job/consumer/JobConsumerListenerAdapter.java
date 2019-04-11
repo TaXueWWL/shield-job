@@ -25,8 +25,6 @@ import java.util.List;
  * @date 2019/4/9 22:33
  * @className JobConsumerListenerAdapter
  * @desc JobConsumerListener适配器
- * TODO 改成构造中传入类型枚举
- * TODO set传入对应的客户端
  */
 public class JobConsumerListenerAdapter implements JobConsumerListener {
 
@@ -106,8 +104,7 @@ public class JobConsumerListenerAdapter implements JobConsumerListener {
         this.messageStoreMySQLTemplate = messageStoreMySQLTemplate;
     }
     /**
-     * TODO 完善重发逻辑
-     * 消费代理, 不需要重发
+     * 消费代理,根据调用方传参决定是否进行重发
      * @param msgs 消息体
      * @param context
      * @return

@@ -18,7 +18,7 @@ public class ShieldInnerMsgResendConst {
     private static final String INNER_MSG_RESEND_PRODUCER_GROUP_PREFIX = "PID_MSG_RESEND_";
 
     /**Redis重发消息队列前缀*/
-    public static final String REDIS_RETRY_MESSAGE_QUEUE_PREFIX = "SHIELD_JOB_RETRY_MSG_QUEUE:";
+    public static final String REDIS_RETRY_MESSAGE_PREFIX = "shield_job:";
 
 
     /**
@@ -27,8 +27,8 @@ public class ShieldInnerMsgResendConst {
      * @return
      */
     public static String getResendTimesRedisKey(String suffix) {
-        StringBuilder keyBuilder = new StringBuilder();
-        return keyBuilder.append("shield:msg_resend:counter:").append(suffix).toString();
+        StringBuilder keyBuilder = new StringBuilder(REDIS_RETRY_MESSAGE_PREFIX);
+        return keyBuilder.append("msg_resend_counter:").append(suffix).toString();
     }
 
     /**
@@ -36,9 +36,9 @@ public class ShieldInnerMsgResendConst {
      * @param suffix
      * @return
      */
-    public static String getStoreRetryJobMsgRedisKey(String suffix) {
-        StringBuilder keyBuilder = new StringBuilder();
-        return keyBuilder.append("shield:msg_resend:store:").append(suffix).toString();
+    public static String getStoreRetryJobMsgQueueKey(String suffix) {
+        StringBuilder keyBuilder = new StringBuilder(REDIS_RETRY_MESSAGE_PREFIX);
+        return keyBuilder.append("retry_message_queue:").append(suffix).toString();
     }
 
     /**

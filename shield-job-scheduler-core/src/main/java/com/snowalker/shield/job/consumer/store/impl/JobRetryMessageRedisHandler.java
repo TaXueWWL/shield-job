@@ -7,8 +7,6 @@ import com.snowalker.shield.job.consumer.store.JobRetryMessage;
 import com.snowalker.shield.job.consumer.store.JobRetryMessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.ListOperations;
-import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.List;
 
@@ -17,7 +15,7 @@ import java.util.List;
  * @version 1.0
  * @date 2019/4/10 16:05
  * @className JobRetryMessageRedisHandler
- * @desc todo
+ * @desc todo 队列列表记录
  */
 public class JobRetryMessageRedisHandler implements JobRetryMessageHandler {
 
@@ -31,44 +29,50 @@ public class JobRetryMessageRedisHandler implements JobRetryMessageHandler {
 
     @Override
     public Result<Boolean> storeRetryJobMsg(JobRetryMessage jobRetryMessage) {
+        String msgId = jobRetryMessage.getMsgId();
+        String msgTopic = jobRetryMessage.getMsgTopic();
+        String msgTag = jobRetryMessage.getMsgTag();
+        String msgBody = jobRetryMessage.getMsgBody();
         try {
             // 序列化重发消息实体到字符串
-//            String suffix = new StringBuilder(jobRetryMessage.getMsgId()).append("_")
-//                    .append(jobRetryMessage.getMsgTopic())
-//                    .toString().toLowerCase();
-//            System.out.println("suffix: " + suffix);
-//            String storeRetryJobMsgKey = ShieldInnerMsgResendConst.getStoreRetryJobMsgRedisKey(suffix);
             String storeRetryJobMsgVal = jobRetryMessage.encode();
             // 放入Redis的队列中，队列名：TOPIC_TAG
-            String queueName = new StringBuilder(ShieldInnerMsgResendConst.REDIS_RETRY_MESSAGE_QUEUE_PREFIX)
+            String queueNameSuffix = new StringBuilder()
                     .append(jobRetryMessage.getMsgTopic())
                     .append(":")
                     .append(jobRetryMessage.getMsgTag())
                     .toString();
-            // TODO 完善队列操作，topic+tag 唯一确定一个队列
-            System.out.println("----messageStoreRedisTemplate instance of RedisTemplate-----" + (messageStoreRedisTemplate instanceof RedisTemplate));
-            System.out.println("----messageStoreRedisTemplate----" + messageStoreRedisTemplate);
-
-            ListOperations listOperations = messageStoreRedisTemplate.getRedisTemplate().opsForList();
+            String queueName = ShieldInnerMsgResendConst.getStoreRetryJobMsgQueueKey(queueNameSuffix.toLowerCase());
 //            Object snowalker = listOperations.rightPop("snowalker", 10, TimeUnit.SECONDS);
-            System.out.println("----listOperations!=null----" + listOperations != null);
             long result = messageStoreRedisTemplate.getRedisTemplate().opsForList().leftPush(queueName, storeRetryJobMsgVal);
-            System.out.println("----messageStoreClientTemplate instance of RedisTemplate-----" + (messageStoreRedisTemplate instanceof RedisTemplate));
+            LOGGER.debug("Storing Retry Job message into Redis has finished, result={}, msgId={}, topic={}, tag={}",
+                    result, msgId, msgTopic, msgTag);
             return result > 0 ?
                     new Result<>(ResultCodeEnum.SUCCESS_CODE.getCode(), ResultCodeEnum.SUCCESS_CODE.getDesc(), true) :
                     new Result<>(ResultCodeEnum.FAIL_CODE.getCode(), ResultCodeEnum.FAIL_CODE.getDesc(), false);
         } catch (Exception e) {
-            LOGGER.error("store retry message into Redis occurred Exception, messageBody={}", jobRetryMessage.getMsgBody(), e);
+            LOGGER.error("Storing Retry Job message into Redis occurred Exception, msgId={}, topic={}, tag={}, messageBody={}",
+                    msgId, msgTopic, msgTag, msgBody, e);
             return new Result<>(ResultCodeEnum.FAIL_CODE.getCode(), ResultCodeEnum.FAIL_CODE.getDesc(), false);
         }
     }
 
     @Override
     public Result<Boolean> countRetryJobMsgResendTimes(String messageId, String msgTopic) {
-        System.out.println("作业消息存储Redis处理器实现--模拟增加重试次数");
-        String suffix = new StringBuilder(messageId).append("_").append(msgTopic).toString().toLowerCase();
-        String jobMsgResendTimesKey = ShieldInnerMsgResendConst.getResendTimesRedisKey(suffix);
-        return null;
+        try {
+            // 拼装全局重发次数key，每一轮调用时增1
+            String suffix = new StringBuilder(msgTopic).append(":").append(messageId).toString().toLowerCase();
+            String jobMsgResendTimesKey = ShieldInnerMsgResendConst.getResendTimesRedisKey(suffix);
+            long result = messageStoreRedisTemplate.getRedisTemplate().opsForValue().increment(jobMsgResendTimesKey);
+            LOGGER.debug("Retry Job message resend times increment finished, result={}, messageId={}, msgTopic={}",
+                    result, messageId, msgTopic);
+            return result > 0 ?
+                    new Result<>(ResultCodeEnum.SUCCESS_CODE.getCode(), ResultCodeEnum.SUCCESS_CODE.getDesc(), true) :
+                    new Result<>(ResultCodeEnum.FAIL_CODE.getCode(), ResultCodeEnum.FAIL_CODE.getDesc(), false);
+        } catch (Exception e) {
+            LOGGER.error("Retry Job message resend times increment occurred Exception, messageId={}, msgTopic={}", messageId, msgTopic, e);
+            return new Result<>(ResultCodeEnum.FAIL_CODE.getCode(), ResultCodeEnum.FAIL_CODE.getDesc(), false);
+        }
     }
 
     @Override

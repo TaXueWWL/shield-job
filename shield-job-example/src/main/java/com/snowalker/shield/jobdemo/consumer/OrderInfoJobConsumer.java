@@ -48,11 +48,6 @@ public class OrderInfoJobConsumer {
     @PostConstruct
     public void execute() throws MQClientException {
 
-        redisTemplate.opsForList().leftPush("product:list", "iphone xs max");
-        redisTemplate.opsForList().leftPush("product:list", "thinkpad x1 carbon");
-        redisTemplate.opsForList().leftPush("product:list", "mackBook pro13");
-        redisTemplate.opsForList().leftPush("product:list", "HuaWei Mate20 pro");
-
         new JobConsumerExecutor().execute(
                 new RocketMQConsumerProperty(
                         TOPIC, CONSUMER_GROUP, nameSrvAddr, TAG), new JobConsumerListenerAdapter(new JobConsumerListener() {
@@ -60,7 +55,7 @@ public class OrderInfoJobConsumer {
                     public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
                         return getConsumeConcurrentlyStatus(msgs);
                     }
-                }, 1, nameSrvAddr, new MessageStoreRedisTemplate(redisTemplate))).start();
+                }, 3, nameSrvAddr, new MessageStoreRedisTemplate(redisTemplate))).start();
     }
 
 
