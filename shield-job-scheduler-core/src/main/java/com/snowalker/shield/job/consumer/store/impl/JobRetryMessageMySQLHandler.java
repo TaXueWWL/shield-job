@@ -14,7 +14,6 @@ import java.util.List;
  * @date 2019/4/10 16:06
  * @className JobRetryMessageMySQLHandler
  * @desc TODO 作业消息存储MySQL处理器实现
- * TODO messageStoreClientTemplate强转为JdbcTemplate
  */
 public class JobRetryMessageMySQLHandler implements JobRetryMessageHandler {
 
@@ -42,7 +41,7 @@ public class JobRetryMessageMySQLHandler implements JobRetryMessageHandler {
     }
 
     @Override
-    public Result<ShieldJobRetryMesssageStatusEnum> markAfterRetryDeadJobMsg(String messageId, String msgTopic) {
+    public Result<ShieldJobRetryMesssageStatusEnum> transferDeadJobMsg(String messageId, String msgTopic) {
         return null;
     }
 

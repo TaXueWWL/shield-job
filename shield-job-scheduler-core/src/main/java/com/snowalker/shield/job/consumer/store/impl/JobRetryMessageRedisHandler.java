@@ -4,6 +4,7 @@ import com.snowalker.shield.job.Result;
 import com.snowalker.shield.job.constant.ResultCodeEnum;
 import com.snowalker.shield.job.constant.ShieldInnerMsgResendConst;
 import com.snowalker.shield.job.constant.ShieldJobRetryMesssageStatusEnum;
+import com.snowalker.shield.job.consumer.resend.MessageResendRedisStoreContext;
 import com.snowalker.shield.job.consumer.store.JobRetryMessage;
 import com.snowalker.shield.job.consumer.store.JobRetryMessageHandler;
 import org.slf4j.Logger;
@@ -45,13 +46,17 @@ public class JobRetryMessageRedisHandler implements JobRetryMessageHandler {
             // 放入Redis的队列中，队列名：TOPIC_TAG
             String queueNameSuffix = new StringBuilder()
                     .append(jobRetryMessage.getMsgTopic())
-                    .append(":")
-                    .append(jobRetryMessage.getMsgTag())
                     .toString();
             String queueName = ShieldInnerMsgResendConst.getStoreRetryJobMsgQueueKey(queueNameSuffix.toLowerCase());
 //            Object snowalker = listOperations.rightPop("snowalker", 10, TimeUnit.SECONDS);
             // result 列表插入后的长度
             long result = messageStoreRedisTemplate.getRedisTemplate().opsForList().leftPush(queueName, storeRetryJobMsgVal);
+            // 设置重发队列名到JobRetryMessageResendContext
+            MessageResendRedisStoreContext.setRetryQueueNameToList(queueName);
+            // 设置当前消息重发次数
+            messageStoreRedisTemplate.getRedisTemplate().opsForValue()
+                .increment(ShieldInnerMsgResendConst.getResendTimesRedisKey(msgId));
+
             LOGGER.debug("Storing Retry Job message into Redis has finished, msgId={}, topic={}, tag={}",
                     msgId, msgTopic, msgTag);
             return result > 0 ?
@@ -107,12 +112,12 @@ public class JobRetryMessageRedisHandler implements JobRetryMessageHandler {
     }
 
     @Override
-    public Result<ShieldJobRetryMesssageStatusEnum> markAfterRetryDeadJobMsg(String messageId, String msgTopic) {
+    public Result<ShieldJobRetryMesssageStatusEnum> transferDeadJobMsg(String messageId, String msgTopic) {
         return null;
     }
 
     /**
-     * 消息入死信队列 TODO 将该消息从原队列弹出 并入死信
+     * 消息入死信队列
      * @param jobRetryMessage
      * @return
      */
@@ -122,6 +127,7 @@ public class JobRetryMessageRedisHandler implements JobRetryMessageHandler {
         String msgTopic = jobRetryMessage.getMsgTopic();
         String msgTag = jobRetryMessage.getMsgTag();
         String deadMsgQueueName = ShieldInnerMsgResendConst.getRetryDeadMsgQueueKey(msgTopic);
+        // 将该消息从原队列弹出入死信
         messageStoreRedisTemplate.getRedisTemplate()
                 .opsForList()
                     .leftPush(deadMsgQueueName, jobRetryMessage.encode());

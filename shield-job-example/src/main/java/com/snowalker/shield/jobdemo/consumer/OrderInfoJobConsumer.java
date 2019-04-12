@@ -4,6 +4,7 @@ import com.snowalker.shield.job.consumer.JobConsumerExecutor;
 import com.snowalker.shield.job.consumer.JobConsumerListenerAdapter;
 import com.snowalker.shield.job.consumer.RocketMQConsumerProperty;
 import com.snowalker.shield.job.consumer.listener.JobConsumerListener;
+import com.snowalker.shield.job.consumer.resend.MessageResendScheduleExecutorServiceConfig;
 import com.snowalker.shield.job.consumer.store.impl.MessageStoreRedisTemplate;
 import com.snowalker.shield.jobdemo.protocol.OrderInfoJobProcotol;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author snowalker
@@ -48,14 +51,26 @@ public class OrderInfoJobConsumer {
     @PostConstruct
     public void execute() throws Exception {
 
+//        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(10);
+        MessageResendScheduleExecutorServiceConfig scheduleExecutorServiceConfig =
+                new MessageResendScheduleExecutorServiceConfig(1,
+                                                            nameSrvAddr,
+                                                            new MessageStoreRedisTemplate(redisTemplate),
+                                                            Executors.newScheduledThreadPool(10),
+                                                            0,
+                                                            3,
+                                                            TimeUnit.SECONDS);
+
         new JobConsumerExecutor().execute(
                 new RocketMQConsumerProperty(
-                        TOPIC, CONSUMER_GROUP, nameSrvAddr, TAG), new JobConsumerListenerAdapter(new JobConsumerListener() {
-                    @Override
-                    public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
-                        return getConsumeConcurrentlyStatus(msgs);
-                    }
-                }, 3, nameSrvAddr, new MessageStoreRedisTemplate(redisTemplate))).start();
+                        TOPIC, CONSUMER_GROUP, nameSrvAddr, TAG),
+                            new JobConsumerListenerAdapter(new JobConsumerListener() {
+                                @Override
+                                public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
+                                    return getConsumeConcurrentlyStatus(msgs);
+                                }
+                            }, scheduleExecutorServiceConfig)).start();
+
     }
 
 
@@ -73,7 +88,7 @@ public class OrderInfoJobConsumer {
                 msgId = msg.getMsgId();
                 msgBody = message;
             }
-            LOGGER.info("模拟订单Job消息消费逻辑结束,状态--[RECONSUME_LATER]--,msgId={}, protocol={}", msgId, msgBody);
+            LOGGER.info("模拟订单Job消息消费逻辑结束,状态--[RECONSUME_LATER]--msgId={}", msgId);
 
             return ConsumeConcurrentlyStatus.RECONSUME_LATER;
         } catch (Exception e) {

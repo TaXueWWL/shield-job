@@ -32,6 +32,21 @@ public class JobRetryMessageHandlerFactory {
 
     private MessageStoreMySQLTemplate messageStoreMySQLTemplate;
 
+    private JobRetryMessageHandlerFactory() {}
+
+    private static JobRetryMessageHandlerFactory factory = null;
+
+    public static JobRetryMessageHandlerFactory getInstance() {
+        if(factory == null) {
+            synchronized (Object.class) {
+                if (factory == null) {
+                    factory = new JobRetryMessageHandlerFactory();
+                }
+            }
+        }
+        return factory;
+    }
+
     /**
      * 从容器获取消息重试处理器实例，不存在则创建并放置到容器中
      * @param resendStoreHandlerType

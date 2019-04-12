@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * @className JobConsumerExecuter
  * @desc Job消费者执行器
  */
-public class JobConsumerExecutor implements JobConsumer {
+public final class JobConsumerExecutor implements JobConsumer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobConsumerExecutor.class);
 

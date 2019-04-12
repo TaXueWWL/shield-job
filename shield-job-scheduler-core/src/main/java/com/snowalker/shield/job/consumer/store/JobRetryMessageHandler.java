@@ -11,7 +11,6 @@ import java.util.List;
  * @date 2019/4/10 14:24
  * @className JobRetryMessageStore
  * @desc 消息重试存储接口
- * TODO 清除达到最大消费次数的普通队列中的值并入死信
  */
 public interface JobRetryMessageHandler {
 
@@ -37,11 +36,12 @@ public interface JobRetryMessageHandler {
     Result<ShieldJobRetryMesssageStatusEnum> removeRetrySuccessJobMsg(List<JobRetryMessage> jobRetryMessages);
 
     /**
-     * 标记达到最大重发次数的死信
-     * @param messageId 消息id，重发保持不变
-     * @param msgTopic  消息主题，与消息id一同作为消息的唯一标识
+     * 转移达到重发阈值的消息到死信队列（死信表等）
+     * @param messageId
+     * @param msgTopic
+     * @return
      */
-    Result<ShieldJobRetryMesssageStatusEnum> markAfterRetryDeadJobMsg(String messageId, String msgTopic);
+    Result<ShieldJobRetryMesssageStatusEnum> transferDeadJobMsg(String messageId, String msgTopic);
 
     /**
      * 存储重试消息到死信队列

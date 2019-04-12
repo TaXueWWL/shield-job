@@ -1,5 +1,6 @@
 package com.snowalker.shield.job.consumer.store.impl;
 
+import com.google.common.base.Preconditions;
 import com.snowalker.shield.job.consumer.store.MessageStoreClientTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -15,6 +16,7 @@ public class MessageStoreRedisTemplate<K, V> extends RedisTemplate<K, V> impleme
     private RedisTemplate redisTemplate;
 
     public MessageStoreRedisTemplate(RedisTemplate redisTemplate) {
+        Preconditions.checkNotNull(redisTemplate, "RedisTemplate cannot be NULL! Please init an useful redisTemplate instance");
         this.redisTemplate = redisTemplate;
     }
 

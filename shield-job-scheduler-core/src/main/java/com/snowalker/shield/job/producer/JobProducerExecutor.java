@@ -5,6 +5,7 @@ import com.snowalker.shield.job.JobProducer;
 import com.snowalker.shield.job.JobSendResult;
 import com.snowalker.shield.job.Result;
 import com.snowalker.shield.job.constant.ResultCodeEnum;
+import com.snowalker.shield.job.constant.ShieldInnerMsgResendConst;
 import com.snowalker.shield.job.exception.JobProduceException;
 import com.snowalker.shield.job.producer.listener.JobProducerListener;
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +28,7 @@ import java.util.List;
  * @className JobProducerExecuter
  * @desc Job生产者执行器
  */
-public class JobProducerExecutor<T extends BaseJob> implements JobProducer {
+public final class JobProducerExecutor<T extends BaseJob> implements JobProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobProducerExecutor.class);
 
@@ -36,7 +37,7 @@ public class JobProducerExecutor<T extends BaseJob> implements JobProducer {
      */
     private DefaultMQProducer defaultMQProducer;
 
-    private int sendTimeout = 3000;
+    private int sendTimeout = ShieldInnerMsgResendConst.MESSAGE_RESEND_MQ_TIMEOUT_SECONDS;
 
     /**
      * 初始化执行器
