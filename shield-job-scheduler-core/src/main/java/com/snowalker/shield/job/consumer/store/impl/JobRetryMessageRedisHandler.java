@@ -48,7 +48,6 @@ public class JobRetryMessageRedisHandler implements JobRetryMessageHandler {
                     .append(jobRetryMessage.getMsgTopic())
                     .toString();
             String queueName = ShieldInnerMsgResendConst.getStoreRetryJobMsgQueueKey(queueNameSuffix.toLowerCase());
-//            Object snowalker = listOperations.rightPop("snowalker", 10, TimeUnit.SECONDS);
             // result 列表插入后的长度
             long result = messageStoreRedisTemplate.getRedisTemplate().opsForList().leftPush(queueName, storeRetryJobMsgVal);
             // 设置重发队列名到JobRetryMessageResendContext
@@ -89,7 +88,6 @@ public class JobRetryMessageRedisHandler implements JobRetryMessageHandler {
 
             // TODO 读取当前已重投递次数，如果超过最大限制投递次数则消息入死信，不再重投递, 当前消息需要弹出队列
             Integer resendTimes = (Integer) messageStoreRedisTemplate.getRedisTemplate().opsForValue().get(jobMsgResendTimesKey);
-            System.out.println(resendTimes);
             if (resendTimes != null && resendTimes > ShieldInnerMsgResendConst.MAX_RESEND_TIMES) {
                 LOGGER.warn("The message has come to MaxResendTimes limit, put it into deadMsgQueue, msgId={}, msgTopic={}, currentResendTimes={}",
                         messageId, msgTopic, resendTimes);

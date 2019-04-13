@@ -4,7 +4,7 @@ import com.snowalker.shield.job.consumer.JobConsumerExecutor;
 import com.snowalker.shield.job.consumer.JobConsumerListenerAdapter;
 import com.snowalker.shield.job.consumer.RocketMQConsumerProperty;
 import com.snowalker.shield.job.consumer.listener.JobConsumerListener;
-import com.snowalker.shield.job.consumer.resend.MessageResendScheduleExecutorServiceConfig;
+import com.snowalker.shield.job.consumer.resend.JobScheduleExecutorConfig;
 import com.snowalker.shield.job.consumer.store.impl.MessageStoreRedisTemplate;
 import com.snowalker.shield.jobdemo.protocol.OrderInfoJobProcotol;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
@@ -51,9 +51,8 @@ public class OrderInfoJobConsumer {
     @PostConstruct
     public void execute() throws Exception {
 
-//        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(10);
-        MessageResendScheduleExecutorServiceConfig scheduleExecutorServiceConfig =
-                new MessageResendScheduleExecutorServiceConfig(1,
+        JobScheduleExecutorConfig jobScheduleExecutorConfig =
+                new JobScheduleExecutorConfig(1,
                                                             nameSrvAddr,
                                                             new MessageStoreRedisTemplate(redisTemplate),
                                                             Executors.newScheduledThreadPool(10),
@@ -69,7 +68,7 @@ public class OrderInfoJobConsumer {
                                 public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
                                     return getConsumeConcurrentlyStatus(msgs);
                                 }
-                            }, scheduleExecutorServiceConfig)).start();
+                            })).start();
 
     }
 

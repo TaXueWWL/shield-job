@@ -113,11 +113,11 @@ public class MessageResendRedisSchedulerImpl implements MessageResendScheduler {
      */
     @Override
     public void doResend() {
-        LOGGER.debug("Starting retry message resend sequence......");
         this.resendExecutorService.scheduleAtFixedRate(
                 new Runnable() {
                     @Override
                     public void run() {
+                        LOGGER.debug("Starting retry message resend sequence......");
                         execute();
                     }
                 }, initialDelay, delay, unit

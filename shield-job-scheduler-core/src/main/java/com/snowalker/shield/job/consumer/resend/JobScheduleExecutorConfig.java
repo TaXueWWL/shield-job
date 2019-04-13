@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  * @className ResendScheduleExecutorServiceConfig
  * @desc 重发线程池配置类
  */
-public class MessageResendScheduleExecutorServiceConfig {
+public class JobScheduleExecutorConfig {
 
     /**最大重复消费次数，达到则提交消息并将消息存储*/
     private volatile Integer maxReconsumeTimes;
@@ -37,7 +37,7 @@ public class MessageResendScheduleExecutorServiceConfig {
     /**重发调度器*/
     private ScheduledExecutorService resendExecutorService;
 
-    public MessageResendScheduleExecutorServiceConfig(Integer maxReconsumeTimes,
+    public JobScheduleExecutorConfig(Integer maxReconsumeTimes,
                                                 String rocketMQNameSrvAddr,
                                                 MessageStoreRedisTemplate messageStoreRedisTemplate,
                                                 ScheduledExecutorService resendExecutorService,
@@ -59,7 +59,7 @@ public class MessageResendScheduleExecutorServiceConfig {
         this.unit = unit;
     }
 
-    public MessageResendScheduleExecutorServiceConfig(Integer maxReconsumeTimes,
+    public JobScheduleExecutorConfig(Integer maxReconsumeTimes,
                                                 String rocketMQNameSrvAddr,
                                                 MessageStoreRedisTemplate messageStoreRedisTemplate,
                                                 ScheduledExecutorService resendExecutorService) {

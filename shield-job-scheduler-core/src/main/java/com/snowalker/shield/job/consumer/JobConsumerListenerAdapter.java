@@ -5,7 +5,7 @@ import com.snowalker.shield.job.constant.ShieldInnerMsgResendConst;
 import com.snowalker.shield.job.constant.ShieldJobMsgResendStatusEnum;
 import com.snowalker.shield.job.constant.ShieldJobMsgResendStoreTypeEnum;
 import com.snowalker.shield.job.consumer.listener.JobConsumerListener;
-import com.snowalker.shield.job.consumer.resend.MessageResendScheduleExecutorServiceConfig;
+import com.snowalker.shield.job.consumer.resend.JobScheduleExecutorConfig;
 import com.snowalker.shield.job.consumer.resend.impl.MessageResendRedisSchedulerImpl;
 import com.snowalker.shield.job.consumer.store.JobRetryMessage;
 import com.snowalker.shield.job.consumer.store.JobRetryMessageHandler;
@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
  * @date 2019/4/9 22:33
  * @className JobConsumerListenerAdapter
  * @desc JobConsumerListener适配器
- * TODO 定时调度机制在此处进行
  */
 public class JobConsumerListenerAdapter implements JobConsumerListener {
 
@@ -84,28 +83,28 @@ public class JobConsumerListenerAdapter implements JobConsumerListener {
     /**
      * 使用MessageStoreRedisTemplate的实例作为重发存储机制，设置最大重试次数，超过后入Redis重发
      * @param jobConsumerListener
-     * @param executorServiceConfig
+     * @param jobScheduleExecutorConfig
      */
     public JobConsumerListenerAdapter(JobConsumerListener jobConsumerListener,
-                                      MessageResendScheduleExecutorServiceConfig executorServiceConfig) {
+                                      JobScheduleExecutorConfig jobScheduleExecutorConfig) {
         Preconditions.checkNotNull(jobConsumerListener, "jobConsumerListener cannot be NULL!");
-        Preconditions.checkNotNull(executorServiceConfig, "executorServiceConfig cannot be NULL!");
+        Preconditions.checkNotNull(jobScheduleExecutorConfig, "jobScheduleExecutorConfig cannot be NULL!");
 
         this.jobConsumerListener = jobConsumerListener;
-        this.maxReconsumeTimes = executorServiceConfig.getMaxReconsumeTimes();
-        this.rocketMQNameSrvAddr = executorServiceConfig.getRocketMQNameSrvAddr();
-        this.messageStoreRedisTemplate = executorServiceConfig.getMessageStoreRedisTemplate();
+        this.maxReconsumeTimes = jobScheduleExecutorConfig.getMaxReconsumeTimes();
+        this.rocketMQNameSrvAddr = jobScheduleExecutorConfig.getRocketMQNameSrvAddr();
+        this.messageStoreRedisTemplate = jobScheduleExecutorConfig.getMessageStoreRedisTemplate();
 
-        if (executorServiceConfig.getResendExecutorService() != null) {
-            this.resendExecutorService = executorServiceConfig.getResendExecutorService();
+        if (jobScheduleExecutorConfig.getResendExecutorService() != null) {
+            this.resendExecutorService = jobScheduleExecutorConfig.getResendExecutorService();
             // 启动Redis消息重发器,构造方法中开启DefaultProducer.start()
             this.messageResendRedisScheduler = new MessageResendRedisSchedulerImpl(
                     new RocketMQProducerProperty(ShieldInnerMsgResendConst.INNER_MSG_RESEND_PRODUCER_GROUP, rocketMQNameSrvAddr),
                     messageStoreRedisTemplate.getRedisTemplate(),
-                    executorServiceConfig.getResendExecutorService(),
-                    executorServiceConfig.getInitialDelay(),
-                    executorServiceConfig.getDelay(),
-                    executorServiceConfig.getUnit()
+                    jobScheduleExecutorConfig.getResendExecutorService(),
+                    jobScheduleExecutorConfig.getInitialDelay(),
+                    jobScheduleExecutorConfig.getDelay(),
+                    jobScheduleExecutorConfig.getUnit()
             );
         }
     }
@@ -191,11 +190,11 @@ public class JobConsumerListenerAdapter implements JobConsumerListener {
                             .setMsgNameSrvAddr(this.rocketMQNameSrvAddr);
                     jobRetryMessageHandler.storeRetryJobMsg(jobRetryMessage);
 
-                    // 消息存储完毕之后，在此处开启扫队列重投递操作
+                    /** 消息存储完毕之后，在此处开启扫队列重投递操作*/
                     if (msgStoreTypeEnum == ShieldJobMsgResendStoreTypeEnum.MSG_STORE_TYPE_REDIS) {
                         // 开启Redis方式的重发调度
-                        messageResendRedisScheduler.doResend();
                         messageResendRedisScheduler.setJobRetryMessageHandler(jobRetryMessageHandler);
+                        messageResendRedisScheduler.doResend();
                     }
                     // 超过最大重复消费次数直接提交消息并持久化消息
                     return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
