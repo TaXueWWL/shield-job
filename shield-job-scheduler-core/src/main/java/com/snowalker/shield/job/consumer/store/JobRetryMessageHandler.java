@@ -9,7 +9,7 @@ import java.util.List;
  * @author snowalker
  * @version 1.0
  * @date 2019/4/10 14:24
- * @className JobRetryMessageStore
+ * @className JobRetryMessageHandler
  * @desc 消息重试存储接口
  */
 public interface JobRetryMessageHandler {
@@ -45,7 +45,6 @@ public interface JobRetryMessageHandler {
 
     /**
      * 存储重试消息到死信队列
-     * TODO 对死信做操作
      * @param jobRetryMessage
      * @return
      */

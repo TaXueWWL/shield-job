@@ -17,7 +17,7 @@ import java.util.List;
  * @version 1.0
  * @date 2019/4/10 16:05
  * @className JobRetryMessageRedisHandler
- * @desc todo 队列列表记录
+ * @desc 重发消息处理器Redis实现
  */
 public class JobRetryMessageRedisHandler implements JobRetryMessageHandler {
 
@@ -86,10 +86,10 @@ public class JobRetryMessageRedisHandler implements JobRetryMessageHandler {
             LOGGER.debug("Retry Job message resend times increment finished, result={}, messageId={}, msgTopic={}",
                     result, messageId, msgTopic);
 
-            // TODO 读取当前已重投递次数，如果超过最大限制投递次数则消息入死信，不再重投递, 当前消息需要弹出队列
+            // 读取当前已重投递次数，如果超过最大限制投递次数则消息入死信，不再重投递, 当前消息需要弹出队列
             Integer resendTimes = (Integer) messageStoreRedisTemplate.getRedisTemplate().opsForValue().get(jobMsgResendTimesKey);
             if (resendTimes != null && resendTimes > ShieldInnerMsgResendConst.MAX_RESEND_TIMES) {
-                LOGGER.warn("The message has come to MaxResendTimes limit, put it into deadMsgQueue, msgId={}, msgTopic={}, currentResendTimes={}",
+                LOGGER.warn("The message has come to MaxResendTimes limit, put it into [dead-Msg-Queue], msgId={}, msgTopic={}, currentResendTimes={}",
                         messageId, msgTopic, resendTimes);
                 this.storeRetryJobMsgIntoDeadQueue(jobRetryMessage);
                 return new Result<>(ResultCodeEnum.SUCCESS_CODE.getCode(), ResultCodeEnum.SUCCESS_CODE.getDesc(), ShieldJobRetryMesssageStatusEnum.RETRY_MESSSAGE_STATUS_DEAD_MSG);
