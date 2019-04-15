@@ -1,5 +1,7 @@
 package com.snowalker.shield.job.producer.listener;
 
+import com.snowalker.shield.job.BaseJob;
+
 import java.util.List;
 
 /**
@@ -9,7 +11,7 @@ import java.util.List;
  * @className JobListener
  * @desc 作业生产者接口
  */
-public interface JobProducerListener<T> {
+public interface JobProducerListener<T extends BaseJob> {
 
     /**
      * 作业生产

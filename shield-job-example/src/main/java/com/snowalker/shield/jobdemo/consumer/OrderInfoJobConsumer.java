@@ -60,6 +60,7 @@ public class OrderInfoJobConsumer {
                                                             3,
                                                             TimeUnit.SECONDS);
 
+        // 不需要重发
         new JobConsumerExecutor().execute(
                 new RocketMQConsumerProperty(
                         TOPIC, CONSUMER_GROUP, nameSrvAddr, TAG),
@@ -70,6 +71,16 @@ public class OrderInfoJobConsumer {
                                 }
                             })).start();
 
+        // 需要消息重发
+//        new JobConsumerExecutor().execute(
+//                new RocketMQConsumerProperty(
+//                        TOPIC, CONSUMER_GROUP, nameSrvAddr, TAG),
+//                new JobConsumerListenerAdapter(new JobConsumerListener() {
+//                    @Override
+//                    public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
+//                        return getConsumeConcurrentlyStatus(msgs);
+//                    }
+//                }, jobScheduleExecutorConfig)).start();
     }
 
 
