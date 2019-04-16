@@ -23,13 +23,6 @@ public class ShieldJobTest {
     private static final Logger LOGGER = LoggerFactory.getLogger("COMMON-APPENDER");
 
     /**
-     * 测试任务重发处理器工厂
-     */
-    @Test
-    public void testJobRetryMessageHandlerFactory() {
-    }
-
-    /**
      * 测试解码重发消息体
      */
     @Test
@@ -60,7 +53,7 @@ public class ShieldJobTest {
         }, new JobScheduleConsumerListener<String>() {
             @Override
             public Object consume(String s) {
-                System.out.println("executeOneway---consuming start!!!! s = " + s);
+                LOGGER.info("executeOneway---consuming start!!!! s = " + s);
                 return null;
             }
         });
@@ -87,7 +80,7 @@ public class ShieldJobTest {
             super.consume(new JobScheduleConsumerListener<String>() {
                 @Override
                 public Object consume(String s) {
-                    System.out.println("consuming start!!!! s = " + s);
+                    LOGGER.info("consuming start!!!! s = " + s);
                     return null;
                 }
             }, list);
