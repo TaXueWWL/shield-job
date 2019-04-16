@@ -36,11 +36,13 @@ public class ShieldJobTest {
 
     @Test
     public void testStandaloneHandler() {
-        MyStandaloneScheduleHandler scheduleHandler = new MyStandaloneScheduleHandler();
+
         // 实现方式1.客户端实现调度策略
+        MyStandaloneScheduleHandler scheduleHandler = new MyStandaloneScheduleHandler();
         scheduleHandler.execute();
         // 实现方式2.使用oneWay调度策略
-        scheduleHandler.executeOneway(new JobScheduleProducerListener<String>() {
+        MyStandaloneScheduleHandler scheduleHandler2 = new MyStandaloneScheduleHandler();
+        scheduleHandler2.executeOneway(new JobScheduleProducerListener<String>() {
             @Override
             public List<String> produce(Object arg) {
                 final List<String> strings2 = new ArrayList<>(10);
@@ -59,7 +61,7 @@ public class ShieldJobTest {
         });
     }
 
-    class MyStandaloneScheduleHandler extends AbstractJobScheduleStandaloneHandler<String> {
+    class MyStandaloneScheduleHandler extends AbstractJobScheduleStandaloneHandler {
 
         @Override
         public void execute() {
@@ -84,6 +86,13 @@ public class ShieldJobTest {
                     return null;
                 }
             }, list);
+        }
+    }
+
+    class MyStandaloneScheduleHandler2 extends AbstractJobScheduleStandaloneHandler {
+
+        @Override
+        public void execute() {
         }
     }
 }
