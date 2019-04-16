@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.snowalker.shield.job.mapper.OrderMapper" >
+
+    <!--下单-->
+    <insert id="insertOrder" parameterType="com.snowalker.shield.job.mapper.OrderEntity">
+        INSERT INTO
+        t_order (order_id,purse_id,user_name,charge_price)
+        VALUES
+        (#{orderId},#{purseId},#{userName},#{chargeMoney})
+    </insert>
+
+    <!--订单状态修改为处理中-->
+    <update id="updateOrderDealing" parameterType="com.snowalker.shield.job.mapper.OrderEntity">
+        UPDATE t_order
+        SET order_status = 2
+        WHERE
+	        order_status = 1
+	    AND order_id = #{orderId}
+    </update>
+
+    <!--订单状态修改为成功-->
+    <update id="updateOrderSuccess" parameterType="com.snowalker.shield.job.mapper.OrderEntity">
+        UPDATE t_order
+        SET order_status = 0,
+            pay_status = 0
+        WHERE
+	        order_status = 2
+	    AND order_id = #{orderId}
+    </update>
+</mapper>

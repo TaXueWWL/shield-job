@@ -1,9 +1,15 @@
 package com.snowalker.shield.job;
 
 import com.snowalker.shield.job.consumer.store.JobRetryMessage;
+import com.snowalker.shield.job.standalone.AbstractJobScheduleStandaloneHandler;
+import com.snowalker.shield.job.standalone.JobScheduleConsumerListener;
+import com.snowalker.shield.job.standalone.JobScheduleProducerListener;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author snowalker
@@ -33,5 +39,58 @@ public class ShieldJobTest {
         jobRetryMessage.decode(decodeMsgString);
         LOGGER.info(jobRetryMessage.toString());
         LOGGER.info("msgBody={}", jobRetryMessage.getMsgBody());
+    }
+
+    @Test
+    public void testStandaloneHandler() {
+        MyStandaloneScheduleHandler scheduleHandler = new MyStandaloneScheduleHandler();
+        // 实现方式1.客户端实现调度策略
+        scheduleHandler.execute();
+        // 实现方式2.使用oneWay调度策略
+        scheduleHandler.executeOneway(new JobScheduleProducerListener<String>() {
+            @Override
+            public List<String> produce(Object arg) {
+                final List<String> strings2 = new ArrayList<>(10);
+                for (int i = 0; i < 10; i++) {
+                    String str = "snowalker-----" + i;
+                    strings2.add(str);
+                }
+                return strings2;
+            }
+        }, new JobScheduleConsumerListener<String>() {
+            @Override
+            public Object consume(String s) {
+                System.out.println("consuming start!!!! s = " + s);
+                return null;
+            }
+        });
+    }
+
+    class MyStandaloneScheduleHandler extends AbstractJobScheduleStandaloneHandler<String> {
+
+        @Override
+        public void execute() {
+            // 生产
+            List<String> list = super.produce(new JobScheduleProducerListener<String>() {
+                @Override
+                public List<String> produce(Object arg) {
+                    final List<String> strings2 = new ArrayList<>(10);
+                    for (int i = 0; i < 10; i++) {
+                        String str = "snowalker-----" + i;
+                        strings2.add(str);
+                    }
+                    return strings2;
+                }
+            }, null);
+
+            // 消费
+            super.consume(new JobScheduleConsumerListener<String>() {
+                @Override
+                public Object consume(String s) {
+                    System.out.println("consuming start!!!! s = " + s);
+                    return null;
+                }
+            }, list);
+        }
     }
 }

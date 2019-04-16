@@ -2,21 +2,18 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>shield-job</artifactId>
+        <groupId>com.snowalker.shield.job</groupId>
+        <version>1.0.0</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.snowalker.shield.job</groupId>
-    <artifactId>shield-job</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>job-common-sql</artifactId>
     <version>1.0.0</version>
 
-    <modules>
-        <module>shield-job-scheduler-core</module>
-        <module>shield-job-example</module>
-        <module>shield-job-common</module>
-        <module>job-common-sql</module>
-    </modules>
-
-    <name>shield-job</name>
+    <name>job-common-sql</name>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -25,19 +22,14 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
-    <!-- 配置远程发布到私服，mvn deploy -->
-    <distributionManagement>
-        <repository>
-            <id>releases</id>
-            <name>Nexus Release Repository</name>
-            <url>http://172.30.61.13:8081/nexus/content/repositories/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <name>Nexus Snapshot Repository</name>
-            <url>http://172.30.61.13:8081/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -77,5 +69,4 @@
             </resource>
         </resources>
     </build>
-
 </project>

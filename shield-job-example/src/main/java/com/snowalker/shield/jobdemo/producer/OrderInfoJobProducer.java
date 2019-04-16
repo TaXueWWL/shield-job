@@ -43,7 +43,7 @@ public class OrderInfoJobProducer {
      */
     private static final String PRODUCER_GROUP = "PID_SNOWALKER_TEST_SHIELD_JOB";
     /**
-     * 测试订单生产者组
+     * 测试订单消费者组
      */
     private static final String CONSUMER_GROUP = "CID_SNOWALKER_TEST_SHIELD_JOB";
 
@@ -82,6 +82,10 @@ public class OrderInfoJobProducer {
                         }
                         return jobs;
                     }, null);
+
+
+
+
             if (jobSendResult == null) {
                 LOGGER.warn("执行作业分发失败,返回为空,topic={}", TOPIC);
             }
@@ -91,5 +95,29 @@ public class OrderInfoJobProducer {
         } catch (Exception e) {
             LOGGER.error("执行作业分发异常", e);
         }
+    }
+
+    private void withoutLambda() {
+        Result<JobSendResult> jobSendResult2 = jobProducerExecutor.execute(
+                (new JobProducerListener() {
+                    @Override
+                    public List produce(Object arg) {
+                        List<OrderInfoJobProcotol> jobs = new ArrayList<>(10);
+                        for (int i = 0; i < 1; i++) {
+                            OrderInfoJobProcotol orderInfoJobProcotol = new OrderInfoJobProcotol();
+                            orderInfoJobProcotol.setOrderId("OD_" + UUID.randomUUID().toString())
+                                    .setUserId("SNOWALKER_" + UUID.randomUUID().toString())
+                                    .setUserName("SNOWALKER_" + i)
+                                    .setJobTraceId("TRACE_" + UUID.randomUUID().toString())
+                                    .setJobTopic(TOPIC)
+                                    .setJobTag(TAG)
+                                    .setJobProducerGroup(PRODUCER_GROUP)
+                                    .setJobConsumerGroup(CONSUMER_GROUP)
+                            ;
+                            jobs.add(orderInfoJobProcotol);
+                        }
+                        return jobs;
+                    }
+                }), null);
     }
 }

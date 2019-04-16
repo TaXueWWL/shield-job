@@ -23,7 +23,7 @@ public class RocketMQConsumerProperty {
     private String nameSrvAddr;
 
     /**消息消费表达式，子表达式，如："tag1 || tag2 || tag3" <br> null 或者 * 表示订阅所有*/
-    private String subExpression;
+    private String subExpression = "*";
 
     /**消息模式，默认集群模式*/
     private MessageModel messageModel = MessageModel.CLUSTERING;

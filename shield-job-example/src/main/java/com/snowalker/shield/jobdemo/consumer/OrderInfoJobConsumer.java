@@ -83,7 +83,6 @@ public class OrderInfoJobConsumer {
 //                }, jobScheduleExecutorConfig)).start();
     }
 
-
     private ConsumeConcurrentlyStatus getConsumeConcurrentlyStatus(List<MessageExt> msgs) {
         try {
             Thread.sleep(3000);
