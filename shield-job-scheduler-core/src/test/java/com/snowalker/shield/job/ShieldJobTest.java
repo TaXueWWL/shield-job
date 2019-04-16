@@ -52,7 +52,7 @@ public class ShieldJobTest {
             public List<String> produce(Object arg) {
                 final List<String> strings2 = new ArrayList<>(10);
                 for (int i = 0; i < 10; i++) {
-                    String str = "snowalker-----" + i;
+                    String str = "executeOneway---snowalker-----" + i;
                     strings2.add(str);
                 }
                 return strings2;
@@ -60,7 +60,7 @@ public class ShieldJobTest {
         }, new JobScheduleConsumerListener<String>() {
             @Override
             public Object consume(String s) {
-                System.out.println("consuming start!!!! s = " + s);
+                System.out.println("executeOneway---consuming start!!!! s = " + s);
                 return null;
             }
         });
