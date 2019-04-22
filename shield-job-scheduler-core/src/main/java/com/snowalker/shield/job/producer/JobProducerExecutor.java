@@ -68,7 +68,7 @@ public final class JobProducerExecutor<T extends BaseJob> implements JobProducer
                                          Object arg) {
         // 取出生产者作业集合
         List<T> jobList = jobProducerListener.produce(arg);
-        if (jobList == null || jobList.size() < 0) {
+        if (jobList == null || jobList.size() <= 0) {
             LOGGER.debug("BaseJob list is empty, do nothing");
             return new Result(true,
                     ResultCodeEnum.SUCCESS_CODE.getCode(),
