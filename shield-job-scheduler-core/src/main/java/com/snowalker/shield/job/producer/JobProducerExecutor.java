@@ -101,7 +101,7 @@ public final class JobProducerExecutor<T extends BaseJob> implements JobProducer
                 try {
                     SendResult sendResult = defaultMQProducer.send(message, sendTimeout);
                     if (sendResult != null) {
-                        LOGGER.debug("send job message successful, message sendStatus={}, msgId={}, queueOffset={}, transactionId={}, offsetMsgId={}, regionId={}, sendSuccessJobList.size()={}",
+                        LOGGER.info("send job message successful, message sendStatus={}, msgId={}, queueOffset={}, transactionId={}, offsetMsgId={}, regionId={}, sendSuccessJobList.size()={}",
                                 sendResult.getSendStatus(),
                                 sendResult.getMsgId(),
                                 sendResult.getQueueOffset(),
