@@ -69,8 +69,12 @@ public final class JobProducerExecutor<T extends BaseJob> implements JobProducer
         // 取出生产者作业集合
         List<T> jobList = jobProducerListener.produce(arg);
         if (jobList == null || jobList.size() < 0) {
-            throw new JobProduceException("BaseJob list is empty, " +
-                    "please make true you have returned job list in com.shield.job.producer.JobProducerListener.produce(final Object arg)");
+            LOGGER.debug("BaseJob list is empty, do nothing");
+            return new Result(true,
+                    ResultCodeEnum.SUCCESS_CODE.getCode(),
+                    ResultCodeEnum.SUCCESS_CODE.getDesc(),
+                    true,
+                    null);
         }
         String topic = jobList.get(0).getJobTopic();
         String tag = jobList.get(0).getJobTag();

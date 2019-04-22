@@ -54,7 +54,7 @@
         <!-- shield-job-scheduler-core -->
         <dependency>
             <artifactId>shield-job-scheduler-core</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
             <groupId>com.snowalker.shield.job</groupId>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
@@ -86,7 +86,6 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
     </dependencies>
-
 
     <build>
         <plugins>
