@@ -67,7 +67,7 @@ public class OrderInfoJobProducer {
             Result<JobSendResult> jobSendResult = jobProducerExecutor.execute(
                     (JobProducerListener<OrderInfoJobProcotol>) arg -> {
                         List<OrderInfoJobProcotol> jobs = new ArrayList<>(10);
-                        for (int i = 0; i < 1; i++) {
+                        for (int i = 0; i < 100; i++) {
                             OrderInfoJobProcotol orderInfoJobProcotol = new OrderInfoJobProcotol();
                             orderInfoJobProcotol.setOrderId("OD_" + UUID.randomUUID().toString())
                                     .setUserId("SNOWALKER_" + UUID.randomUUID().toString())

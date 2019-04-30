@@ -6,7 +6,6 @@ import com.snowalker.shield.job.standalone.JobScheduleConsumerListener;
 import com.snowalker.shield.job.standalone.JobScheduleProducerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -32,7 +31,7 @@ public class OrderInfoJobProducerStandalone extends AbstractJobScheduleStandalon
         LOGGER.info("单机模式调度执行开......");
     }
 
-    @Scheduled(cron = "${order.standalone.cron}")
+//    @Scheduled(cron = "${order.standalone.cron}")
     public void execute() {
         executeOneway(new JobScheduleProducerListener<String>() {
             @Override

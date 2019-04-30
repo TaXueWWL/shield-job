@@ -61,26 +61,26 @@ public class OrderInfoJobConsumer {
                                                             TimeUnit.SECONDS);
 
         // 不需要重发
-        new JobConsumerExecutor().execute(
-                new RocketMQConsumerProperty(
-                        TOPIC, CONSUMER_GROUP, nameSrvAddr, TAG),
-                            new JobConsumerListenerAdapter(new JobConsumerListener() {
-                                @Override
-                                public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
-                                    return getConsumeConcurrentlyStatus(msgs);
-                                }
-                            })).start();
-
-        // 需要消息重发
 //        new JobConsumerExecutor().execute(
 //                new RocketMQConsumerProperty(
 //                        TOPIC, CONSUMER_GROUP, nameSrvAddr, TAG),
-//                new JobConsumerListenerAdapter(new JobConsumerListener() {
-//                    @Override
-//                    public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
-//                        return getConsumeConcurrentlyStatus(msgs);
-//                    }
-//                }, jobScheduleExecutorConfig)).start();
+//                            new JobConsumerListenerAdapter(new JobConsumerListener() {
+//                                @Override
+//                                public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
+//                                    return getConsumeConcurrentlyStatus(msgs);
+//                                }
+//                            })).start();
+
+        // 需要消息重发
+        new JobConsumerExecutor().execute(
+                new RocketMQConsumerProperty(
+                        TOPIC, CONSUMER_GROUP, nameSrvAddr, TAG),
+                new JobConsumerListenerAdapter(new JobConsumerListener() {
+                    @Override
+                    public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
+                        return getConsumeConcurrentlyStatus(msgs);
+                    }
+                }, jobScheduleExecutorConfig)).start();
     }
 
     private ConsumeConcurrentlyStatus getConsumeConcurrentlyStatus(List<MessageExt> msgs) {

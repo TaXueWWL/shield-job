@@ -106,7 +106,24 @@ public class JobConsumerListenerAdapter implements JobConsumerListener {
                     jobScheduleExecutorConfig.getDelay(),
                     jobScheduleExecutorConfig.getUnit()
             );
+
+            // 注册shutdownhook
+            registeShutdownHook(this.resendExecutorService);
         }
+
+    }
+
+    private void registeShutdownHook(ScheduledExecutorService executorService) {
+        final ScheduledExecutorService _executorService = executorService;
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                if (!_executorService.isShutdown()) {
+                    _executorService.shutdown();
+                    LOGGER.info("[ShutdownHook]message Resend ThreadPool resendExecutorService  has been shutdown now.");
+                }
+            }
+        });
     }
 
     /**
