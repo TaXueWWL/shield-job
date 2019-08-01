@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>shield-job-scheduler-core</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <groupId>com.snowalker.shield.job</groupId>
 
     <properties>
@@ -23,7 +23,7 @@
         <logback-version>1.2.3</logback-version>
         <junit-version>4.12</junit-version>
         <spring-boot-version>2.1.3.RELEASE</spring-boot-version>
-        <jackson-version>2.9.8</jackson-version>
+        <jackson-version>2.9.9.1</jackson-version>
     </properties>
 
     <dependencies>
@@ -101,6 +101,20 @@
         </dependency>
 
     </dependencies>
+
+    <!-- 配置远程发布到私服，mvn deploy -->
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>Nexus Release Repository</name>
+            <url>http://172.30.61.13:8081/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>Nexus Snapshot Repository</name>
+            <url>http://172.30.61.13:8081/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <build>
         <plugins>
