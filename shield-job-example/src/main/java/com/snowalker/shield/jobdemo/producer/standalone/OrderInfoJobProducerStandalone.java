@@ -1,11 +1,11 @@
 package com.snowalker.shield.jobdemo.producer.standalone;
 
-import com.snowalker.shield.job.producer.JobProducerExecutor;
 import com.snowalker.shield.job.standalone.AbstractJobScheduleStandaloneHandler;
 import com.snowalker.shield.job.standalone.JobScheduleConsumerListener;
 import com.snowalker.shield.job.standalone.JobScheduleProducerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -24,14 +24,12 @@ public class OrderInfoJobProducerStandalone extends AbstractJobScheduleStandalon
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderInfoJobProducerStandalone.class);
 
-    private JobProducerExecutor jobProducerExecutor;
-
     @PostConstruct
     public void init() {
         LOGGER.info("单机模式调度执行开......");
     }
 
-//    @Scheduled(cron = "${order.standalone.cron}")
+    @Scheduled(cron = "${order.standalone.cron}")
     public void execute() {
         executeOneway(new JobScheduleProducerListener<String>() {
             @Override

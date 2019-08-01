@@ -25,6 +25,9 @@ public abstract class AbstractJobScheduleStandaloneHandler<T> {
      * @param jobScheduleConsumerListener
      */
     public void consume(JobScheduleConsumerListener<T> jobScheduleConsumerListener, List<T> list) {
+        if (list == null || list.size() <= 0) {
+            return;
+        }
         list.stream().forEach((T t) -> {
             jobScheduleConsumerListener.consume(t);
         });
